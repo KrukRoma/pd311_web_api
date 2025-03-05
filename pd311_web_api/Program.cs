@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using pd311_web_api.DAL;
+using static pd311_web_api.DAL.Entities.IdentityEntities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseNpgsql("name=NpgsqlLocal");
 });
+
+// Add identity
+builder.Services
+    .AddIdentity<AppUser, AppRole>()
+    .AddEntityFrameworkStores<AppDbContext>();
 
 //builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
