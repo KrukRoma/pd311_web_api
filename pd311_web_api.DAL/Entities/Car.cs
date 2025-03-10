@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace pd311_web_api.DAL.Entities
 {
@@ -13,6 +14,17 @@ namespace pd311_web_api.DAL.Entities
         [Required]
         [MaxLength(100)]
         public required string Brand { get; set; }
+        [Range(1800, int.MaxValue)]
         public int Year { get; set; }
+        [Range(0, double.MaxValue)]
+        public decimal Price { get; set; }
+        [MaxLength(50)]
+        public string? Color { get; set; }
+        [MaxLength(50)]
+        public string? Gearbox { get; set; }
+
+        [ForeignKey("Manufacture")]
+        public string? ManufactureId { get; set; }
+        public Manufacture? Manufacture { get; set; }
     }
 }

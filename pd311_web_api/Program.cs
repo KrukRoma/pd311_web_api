@@ -5,6 +5,7 @@ using pd311_web_api.BLL.DTOs.Account;
 using pd311_web_api.BLL.Services.Account;
 using pd311_web_api.BLL.Services.Email;
 using pd311_web_api.BLL.Services.Role;
+using pd311_web_api.BLL.Services.User;
 using pd311_web_api.DAL;
 using static pd311_web_api.DAL.Entities.IdentityEntities;
 
@@ -12,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
@@ -19,6 +21,9 @@ builder.Services.AddControllers();
 
 // Add fluent validation
 builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
+
+// Add automapper
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 

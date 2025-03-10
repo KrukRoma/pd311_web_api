@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using pd311_web_api.BLL.DTOs.Role;
 using static pd311_web_api.DAL.Entities.IdentityEntities;
@@ -8,19 +9,17 @@ namespace pd311_web_api.BLL.Services.Role
     public class RoleService : IRoleService
     {
         private readonly RoleManager<AppRole> _roleManager;
+        private readonly IMapper _mapper;
 
-        public RoleService(RoleManager<AppRole> roleManager)
+        public RoleService(RoleManager<AppRole> roleManager, IMapper mapper)
         {
             _roleManager = roleManager;
+            _mapper = mapper;
         }
 
         public async Task<bool> CreateAsync(RoleDto dto)
         {
-            var entity = new AppRole
-            {
-                Id = dto.Id ?? Guid.NewGuid().ToString(),
-                Name = dto.Name
-            };
+            var entity = _mapper.Map<AppRole>(dto);
 
             var result = await _roleManager.CreateAsync(entity);
 
@@ -43,11 +42,8 @@ namespace pd311_web_api.BLL.Services.Role
         public async Task<List<RoleDto>> GetAllAsync()
         {
             var entities = await _roleManager.Roles.ToListAsync();
-            var dtos = entities.Select(r => new RoleDto
-            {
-                Id = r.Id,
-                Name = r.Name
-            });
+
+            var dtos = _mapper.Map<List<RoleDto>>(entities);
 
             return dtos.ToList();
         }
@@ -59,22 +55,14 @@ namespace pd311_web_api.BLL.Services.Role
             if (entity == null)
                 return null;
 
-            var dto = new RoleDto
-            {
-                Id = entity.Id,
-                Name = entity.Name
-            };
+            var dto = _mapper.Map<RoleDto>(entity);
 
             return dto;
         }
 
         public async Task<bool> UpdateAsync(RoleDto dto)
         {
-            var entity = new AppRole
-            {
-                Id = dto.Id ?? Guid.NewGuid().ToString(),
-                Name = dto.Name
-            };
+            var entity = _mapper.Map<AppRole>(dto);
 
             var result = await _roleManager.UpdateAsync(entity);
 

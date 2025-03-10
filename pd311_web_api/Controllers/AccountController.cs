@@ -54,5 +54,16 @@ namespace pd311_web_api.Controllers
 
             return Redirect("https://google.com");
         }
+
+        [HttpGet("sendConfirmEmailToken")]
+        public async Task<IActionResult> SendConfirmEmailTokenAsync(string? userId)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(userId))
+                return NotFound();
+
+            var result = await _accountService.SendConfirmEmailTokenAsync(userId);
+
+            return result ? Ok("Email sent") : BadRequest("Sent email error");
+        }
     }
 }
