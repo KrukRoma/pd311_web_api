@@ -51,6 +51,18 @@ builder.Services
 //builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("localhost3000", builder =>
+    {
+        builder.WithOrigins("http://localhost:3000")
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -62,6 +74,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("localhost3000");
 
 app.UseAuthorization();
 
