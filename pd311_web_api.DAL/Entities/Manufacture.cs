@@ -15,7 +15,7 @@ namespace pd311_web_api.DAL.Entities
         public string? Founder { get; set; }
         [MaxLength(255)]
         public string? Director { get; set; }
-
+        public string? Image { get; set; }
         public ICollection<Car> Cars { get; set; } = [];
     }
 }

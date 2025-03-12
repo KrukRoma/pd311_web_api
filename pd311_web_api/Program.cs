@@ -1,9 +1,13 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
+using pd311_web_api.BLL;
 using pd311_web_api.BLL.DTOs.Account;
 using pd311_web_api.BLL.Services.Account;
 using pd311_web_api.BLL.Services.Email;
+using pd311_web_api.BLL.Services.Image;
+using pd311_web_api.BLL.Services.Manufactures;
 using pd311_web_api.BLL.Services.Role;
 using pd311_web_api.BLL.Services.User;
 using pd311_web_api.DAL;
@@ -16,6 +20,8 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IManufactureService, ManufactureService>();
 
 builder.Services.AddControllers();
 
@@ -74,6 +80,27 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+Settings.RootPath = builder.Environment.ContentRootPath;
+string rootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+string imagesPath = Path.Combine(rootPath, Settings.RootImagesPath);
+
+if(!Directory.Exists(rootPath))
+{
+    Directory.CreateDirectory(rootPath);
+}
+
+if (!Directory.Exists(imagesPath))
+{
+    Directory.CreateDirectory(imagesPath);
+}
+
+// static files
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(imagesPath),
+    RequestPath = "/images"
+});
 
 app.UseCors("localhost3000");
 
