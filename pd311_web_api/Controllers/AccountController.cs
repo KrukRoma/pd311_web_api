@@ -7,7 +7,7 @@ namespace pd311_web_api.Controllers
 {
     [ApiController]
     [Route("api/account")]
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
         private readonly IAccountService _accountService;
         private readonly IValidator<LoginDto> _loginValidator;
@@ -28,12 +28,9 @@ namespace pd311_web_api.Controllers
                 return BadRequest(validationResult);
             // <<< end
 
-            var result = await _accountService.LoginAsync(dto);
+            var response = await _accountService.LoginAsync(dto);
 
-            if (result == null)
-                return BadRequest("Incorrect userName or password");
-            
-            return Ok(result);
+            return CreateActionResult(response);
         }
 
         [HttpPost("register")]

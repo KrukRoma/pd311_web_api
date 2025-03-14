@@ -37,19 +37,19 @@ namespace pd311_web_api.BLL.Services.Account
             return false;
         }
 
-        public async Task<AppUser?> LoginAsync(LoginDto dto)
+        public async Task<ServiceResponse> LoginAsync(LoginDto dto)
         {
             var user = await _userManager.FindByNameAsync(dto.UserName ?? "");
 
             if (user == null)
-                return null;
+                return new ServiceResponse($"Користувача з іменем '{dto.UserName}' не знайдено");
 
             var result = await _userManager.CheckPasswordAsync(user, dto.Password ?? "");
 
-            if (result)
-                return user;
-            else
-                return null;
+            if (!result)
+                return new ServiceResponse($"Пароль вказано невірно");
+
+            return new ServiceResponse("Успішний вхід", true, user);
         }
 
         public async Task<AppUser?> RegisterAsync(RegisterDto dto)

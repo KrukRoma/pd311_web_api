@@ -4,6 +4,7 @@ using pd311_web_api.BLL.DTOs.Manufactures;
 using pd311_web_api.BLL.Services.Image;
 using pd311_web_api.DAL;
 using pd311_web_api.DAL.Entities;
+using pd311_web_api.DAL.Repositories.Manufactures;
 
 namespace pd311_web_api.BLL.Services.Manufactures
 {
@@ -11,13 +12,15 @@ namespace pd311_web_api.BLL.Services.Manufactures
     {
         private readonly IMapper _mapper;
         private readonly IImageService _imageService;
+        private readonly IManufactureRepository _manufactureRepository;
         private readonly AppDbContext _context;
 
-        public ManufactureService(IMapper mapper, AppDbContext context, IImageService imageService)
+        public ManufactureService(IMapper mapper, AppDbContext context, IImageService imageService, IManufactureRepository manufactureRepository)
         {
             _mapper = mapper;
             _context = context;
             _imageService = imageService;
+            _manufactureRepository = manufactureRepository;
         }
 
         public async Task<bool> CreateAsync(CreateManufactureDto dto)
@@ -35,10 +38,9 @@ namespace pd311_web_api.BLL.Services.Manufactures
             }
 
             entity.Image = imageName;
-            await _context.Manufactures.AddAsync(entity);
-            var result = await _context.SaveChangesAsync();
+            var result = await _manufactureRepository.CreateAsync(entity);
 
-            return result != 0;
+            return result;
         }
 
         public async Task<bool> DeleteAsync(string id)

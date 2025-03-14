@@ -11,6 +11,9 @@ using pd311_web_api.BLL.Services.Manufactures;
 using pd311_web_api.BLL.Services.Role;
 using pd311_web_api.BLL.Services.User;
 using pd311_web_api.DAL;
+using pd311_web_api.DAL.Entities;
+using pd311_web_api.DAL.Repositories.Cars;
+using pd311_web_api.DAL.Repositories.Manufactures;
 using static pd311_web_api.DAL.Entities.IdentityEntities;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +25,10 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IManufactureService, ManufactureService>();
+
+// Add repositories
+builder.Services.AddScoped<IManufactureRepository, ManufactureRepository>();
+builder.Services.AddScoped<ICarRepository, CarRepository>();
 
 builder.Services.AddControllers();
 

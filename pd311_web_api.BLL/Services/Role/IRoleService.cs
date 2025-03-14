@@ -4,10 +4,10 @@ namespace pd311_web_api.BLL.Services.Role
 {
     public interface IRoleService
     {
-        public Task<bool> CreateAsync(RoleDto dto);
-        public Task<bool> UpdateAsync(RoleDto dto);
-        public Task<bool> DeleteAsync(string id);
-        public Task<RoleDto?> GetByIdAsync(string id);
-        public Task<List<RoleDto>> GetAllAsync();
+        public Task<ServiceResponse> CreateAsync(RoleDto dto);
+        public Task<ServiceResponse> UpdateAsync(RoleDto dto);
+        public Task<ServiceResponse> DeleteAsync(string id);
+        public Task<ServiceResponse> GetByIdAsync(string id);
+        public Task<ServiceResponse> GetAllAsync();
     }
 }

@@ -21,8 +21,8 @@ namespace pd311_web_api.Controllers
         [HttpGet("list")]
         public async Task<IActionResult> GetAllAsync()
         {
-            var roles = await _roleService.GetAllAsync();
-            return Ok(roles);
+            var response = await _roleService.GetAllAsync();
+            return CreateActionResult(response); 
         }
 
         [HttpGet]
@@ -31,8 +31,8 @@ namespace pd311_web_api.Controllers
             if (!ValidateId(id, out string message))
                 return BadRequest(message);
 
-            var result = await _roleService.GetByIdAsync(id);
-            return Ok(result);
+            var response = await _roleService.GetByIdAsync(id);
+            return CreateActionResult(response);
         }
 
         [HttpPost]
@@ -43,8 +43,8 @@ namespace pd311_web_api.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(validationResult);
 
-            var result = await _roleService.CreateAsync(dto);
-            return result ? Ok("Role created") : BadRequest("Role not created");
+            var response = await _roleService.CreateAsync(dto);
+            return CreateActionResult(response);
         }
 
         [HttpPut]
@@ -58,8 +58,8 @@ namespace pd311_web_api.Controllers
             if (!ValidateId(dto.Id, out string message))
                 return BadRequest(message);
 
-            var result = await _roleService.UpdateAsync(dto);
-            return result ? Ok("Role updated") : BadRequest("Role not updated");
+            var response = await _roleService.UpdateAsync(dto);
+            return CreateActionResult(response);
         }
 
         [HttpDelete]
@@ -68,8 +68,8 @@ namespace pd311_web_api.Controllers
             if (!ValidateId(id, out string message))
                 return BadRequest(message);
 
-            var result = await _roleService.DeleteAsync(id);
-            return result ? Ok("Role deleted") : BadRequest("Role not deleted");
+            var response = await _roleService.DeleteAsync(id);
+            return CreateActionResult(response);
         }
     }
 }
