@@ -42,5 +42,12 @@ namespace pd311_web_api.Controllers
             var result = await _manufactureService.DeleteAsync(id);
             return result ? Ok(result) : BadRequest(result);
         }
+
+        [HttpGet("list")]
+        public async Task<IActionResult> GetAllAsync()
+        {
+            var response = await _manufactureService.GetAllAsync();
+            return CreateActionResult(response);
+        }
     }
 }

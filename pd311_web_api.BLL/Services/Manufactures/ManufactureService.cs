@@ -62,6 +62,17 @@ namespace pd311_web_api.BLL.Services.Manufactures
             return result != 0;
         }
 
+        public async Task<ServiceResponse> GetAllAsync()
+        {
+            var entities = await _manufactureRepository
+                .GetAll()
+                .ToListAsync();
+
+            var dtos = _mapper.Map<List<ManufactureDto>>(entities);
+
+            return new ServiceResponse("Виробники отримано", true, dtos);
+        }
+
         public async Task<bool> UpdateAsync(UpdateManufactureDto dto)
         {
             var entity = await _context.Manufactures

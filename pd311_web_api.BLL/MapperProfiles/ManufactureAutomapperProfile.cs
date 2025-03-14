@@ -18,6 +18,9 @@ namespace pd311_web_api.BLL.MapperProfiles
             CreateMap<UpdateManufactureDto, Manufacture>()
                 .ForMember(dest => dest.Image, opt => opt.Ignore())
                 .ForMember(dest => dest.Cars, opt => opt.Ignore());
+
+            // Manufacture -> ManufactureDto
+            CreateMap<Manufacture, ManufactureDto>();
         }
     }
 }
