@@ -18,21 +18,22 @@ namespace pd311_web_api.Controllers
             _roleValidator = roleValidator;
         }
 
-        [HttpGet("list")]
-        public async Task<IActionResult> GetAllAsync()
-        {
-            var response = await _roleService.GetAllAsync();
-            return CreateActionResult(response); 
-        }
-
         [HttpGet]
-        public async Task<IActionResult> GetByIdAsync(string? id)
+        public async Task<IActionResult> GetAsync(string? id)
         {
-            if (!ValidateId(id, out string message))
-                return BadRequest(message);
+            if(string.IsNullOrEmpty(id))
+            {
+                var response = await _roleService.GetAllAsync();
+                return CreateActionResult(response);
+            }
+            else
+            {
+                if (!ValidateId(id, out string message))
+                    return BadRequest(message);
 
-            var response = await _roleService.GetByIdAsync(id);
-            return CreateActionResult(response);
+                var response = await _roleService.GetByIdAsync(id);
+                return CreateActionResult(response);
+            }
         }
 
         [HttpPost]

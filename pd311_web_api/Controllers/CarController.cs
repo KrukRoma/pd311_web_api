@@ -1,33 +1,32 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using pd311_web_api.DAL;
-using pd311_web_api.DAL.Entities;
+using pd311_web_api.BLL.DTOs.Car;
+using pd311_web_api.BLL.Services.Cars;
 
 namespace pd311_web_api.Controllers
 {
     [ApiController]
     [Route("api/car")]
-    public class CarController : ControllerBase
+    public class CarController : BaseController
     {
-        private AppDbContext _context;
+        private readonly ICarService _carService;
 
-        public CarController(AppDbContext context)
+        public CarController(ICarService carService)
         {
-            _context = context;
-        }
-
-        [HttpGet]
-        public IActionResult GetCars()
-        {
-            var entities = _context.Cars.ToList();
-            return Ok(entities);
+            _carService = carService;
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] Car entity)
+        public async Task<IActionResult> CreateAsync(CreateCarDto dto)
         {
-            _context.Cars.Add(entity);
-            _context.SaveChanges();
-            return Ok("Автомобіль створено");
+            var response = await _carService.CreateAsync(dto);
+            return CreateActionResult(response);
+        }
+
+        [HttpGet("list")]
+        public async Task<IActionResult> GetAllAsync()
+        {
+            var response = await _carService.GetAllAsync();
+            return CreateActionResult(response);
         }
     }
 }

@@ -5,5 +5,6 @@
         public static string RootPath = "";
         public const string RootImagesPath = "images";
         public const string ManufacturesImagesPath = "manufactures";
+        public const string CarsImagesPath = "cars";
     }
 }

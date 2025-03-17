@@ -5,6 +5,7 @@ using Microsoft.Extensions.FileProviders;
 using pd311_web_api.BLL;
 using pd311_web_api.BLL.DTOs.Account;
 using pd311_web_api.BLL.Services.Account;
+using pd311_web_api.BLL.Services.Cars;
 using pd311_web_api.BLL.Services.Email;
 using pd311_web_api.BLL.Services.Image;
 using pd311_web_api.BLL.Services.Manufactures;
@@ -24,6 +25,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<IManufactureService, ManufactureService>();
 
 // Add repositories
