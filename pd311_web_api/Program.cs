@@ -1,7 +1,9 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.IdentityModel.Tokens;
 using pd311_web_api.BLL;
 using pd311_web_api.BLL.DTOs.Account;
 using pd311_web_api.BLL.Services.Account;
@@ -12,12 +14,32 @@ using pd311_web_api.BLL.Services.Manufactures;
 using pd311_web_api.BLL.Services.Role;
 using pd311_web_api.BLL.Services.User;
 using pd311_web_api.DAL;
-using pd311_web_api.DAL.Entities;
 using pd311_web_api.DAL.Repositories.Cars;
 using pd311_web_api.DAL.Repositories.Manufactures;
+using System.Text;
 using static pd311_web_api.DAL.Entities.IdentityEntities;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            RequireExpirationTime = true,
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"] ?? ""))
+        };
+    });
 
 // Add services to the container.
 builder.Services.AddScoped<IAccountService, AccountService>();
@@ -113,6 +135,7 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.UseCors("localhost3000");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

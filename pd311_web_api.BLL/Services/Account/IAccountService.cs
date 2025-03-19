@@ -6,7 +6,7 @@ namespace pd311_web_api.BLL.Services.Account
     public interface IAccountService
     {
         public Task<ServiceResponse> LoginAsync(LoginDto dto);
-        public Task<AppUser?> RegisterAsync(RegisterDto dto);
+        public Task<ServiceResponse> RegisterAsync(RegisterDto dto);
         public Task<bool> ConfirmEmailAsync(string id, string token);
         public Task<bool> SendConfirmEmailTokenAsync(string userId);
     }
