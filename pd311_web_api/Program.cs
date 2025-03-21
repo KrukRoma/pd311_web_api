@@ -16,10 +16,16 @@ using pd311_web_api.BLL.Services.User;
 using pd311_web_api.DAL;
 using pd311_web_api.DAL.Repositories.Cars;
 using pd311_web_api.DAL.Repositories.Manufactures;
+using pd311_web_api.Middlewares;
 using System.Text;
 using static pd311_web_api.DAL.Entities.IdentityEntities;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -101,6 +107,11 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Middlewares
+app.UseMiddleware<MiddlewareLogger>();
+app.UseMiddleware<MiddlewareExceptionHandler>();
+app.UseMiddleware<MiddlewareNullExceptionHandler>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

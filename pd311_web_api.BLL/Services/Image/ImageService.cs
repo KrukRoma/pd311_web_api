@@ -23,23 +23,15 @@ namespace pd311_web_api.BLL.Services.Image
 
         public bool DeleteImage(string imagePath)
         {
-            try
+            imagePath = Path.Combine(ImagesPath, imagePath);
+
+            if (File.Exists(imagePath))
             {
-                imagePath = Path.Combine(ImagesPath, imagePath);
-
-                if (File.Exists(imagePath))
-                {
-                    File.Delete(imagePath);
-                }
-
-                return true;
+                File.Delete(imagePath);
             }
-            catch (Exception)
-            {
 
-                return false;
-            }
-           
+            return true;
+
         }
 
         public async Task<List<CarImage>> SaveCarImagesAsync(IEnumerable<IFormFile> images, string directoryPath)

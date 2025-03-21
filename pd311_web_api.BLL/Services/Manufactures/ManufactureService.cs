@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using pd311_web_api.BLL.DTOs.Manufactures;
 using pd311_web_api.BLL.Services.Image;
 using pd311_web_api.DAL;
@@ -14,13 +15,15 @@ namespace pd311_web_api.BLL.Services.Manufactures
         private readonly IImageService _imageService;
         private readonly IManufactureRepository _manufactureRepository;
         private readonly AppDbContext _context;
+        private readonly ILogger<ManufactureService> _logger;
 
-        public ManufactureService(IMapper mapper, AppDbContext context, IImageService imageService, IManufactureRepository manufactureRepository)
+        public ManufactureService(IMapper mapper, AppDbContext context, IImageService imageService, IManufactureRepository manufactureRepository, ILogger<ManufactureService> logger)
         {
             _mapper = mapper;
             _context = context;
             _imageService = imageService;
             _manufactureRepository = manufactureRepository;
+            _logger = logger;
         }
 
         public async Task<bool> CreateAsync(CreateManufactureDto dto)
@@ -69,6 +72,12 @@ namespace pd311_web_api.BLL.Services.Manufactures
                 .ToListAsync();
 
             var dtos = _mapper.Map<List<ManufactureDto>>(entities);
+
+            string tab = "      ";
+            string names = string.Join($"\n{tab}", dtos.Select(d => d.Name));
+
+            _logger.LogInformation(new EventId(200, "Ok"), $"Manufactures received: {DateTime.Now.ToString("dd.MM.yyyy")}");
+            _logger.LogInformation(new EventId(200, "Ok"), names);
 
             return new ServiceResponse("Виробники отримано", true, dtos);
         }
