@@ -17,15 +17,20 @@ using pd311_web_api.DAL;
 using pd311_web_api.DAL.Repositories.Cars;
 using pd311_web_api.DAL.Repositories.Manufactures;
 using pd311_web_api.Middlewares;
+using Serilog;
 using System.Text;
 using static pd311_web_api.DAL.Entities.IdentityEntities;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Logging
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-builder.Logging.AddDebug();
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("logs/log_.txt", rollingInterval: RollingInterval.Day)
+    .Enrich.FromLogContext()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -109,9 +114,9 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Middlewares
-app.UseMiddleware<MiddlewareLogger>();
 app.UseMiddleware<MiddlewareExceptionHandler>();
 app.UseMiddleware<MiddlewareNullExceptionHandler>();
+app.UseMiddleware<MiddlewareLogger>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -122,6 +127,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("localhost3000");
 
 Settings.RootPath = builder.Environment.ContentRootPath;
 string rootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
@@ -143,8 +150,6 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new PhysicalFileProvider(imagesPath),
     RequestPath = "/images"
 });
-
-app.UseCors("localhost3000");
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -5,12 +5,10 @@ namespace pd311_web_api.Middlewares
     public class MiddlewareExceptionHandler
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<MiddlewareExceptionHandler> _logger;
 
-        public MiddlewareExceptionHandler(RequestDelegate next, ILogger<MiddlewareExceptionHandler> logger)
+        public MiddlewareExceptionHandler(RequestDelegate next)
         {
             _next = next;
-            _logger = logger;
         }
 
         public async Task Invoke(HttpContext context)

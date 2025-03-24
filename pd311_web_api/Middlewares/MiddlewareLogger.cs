@@ -13,11 +13,13 @@
 
         public async Task Invoke(HttpContext context)
         {
-            _logger.LogWarning($"{context.Request.Path}: {context.Request.Method}, Server: {context.Request.Headers.Server}");
+            string? ip = context.Connection.RemoteIpAddress?.ToString();
+            _logger.LogInformation($"Request: client ip - {ip}");
 
             await _next(context);
 
-            _logger.LogWarning($"RESPONSE - {DateTime.Now.Second}:{DateTime.Now.Millisecond}:{DateTime.Now.Microsecond}: ");
+            
+            _logger.LogInformation($"Response: client ip - {ip}");
         }
     }
 }

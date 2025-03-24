@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using Microsoft.Extensions.Logging;
 using pd311_web_api.BLL.DTOs.Role;
+using pd311_web_api.BLL.Services.Email;
 using static pd311_web_api.DAL.Entities.IdentityEntities;
 
 namespace pd311_web_api.BLL.Services.Role
@@ -10,12 +11,14 @@ namespace pd311_web_api.BLL.Services.Role
     public class RoleService : IRoleService
     {
         private readonly RoleManager<AppRole> _roleManager;
+        private readonly ILogger<RoleService> _logger;
         private readonly IMapper _mapper;
 
-        public RoleService(RoleManager<AppRole> roleManager, IMapper mapper)
+        public RoleService(RoleManager<AppRole> roleManager, IMapper mapper, ILogger<RoleService> logger)
         {
             _roleManager = roleManager;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<ServiceResponse> CreateAsync(RoleDto dto)
@@ -57,6 +60,8 @@ namespace pd311_web_api.BLL.Services.Role
 
             var dtos = _mapper.Map<List<RoleDto>>(entities);
 
+            _logger.LogInformation($"Roles received {dtos.Count}");
+
             return new ServiceResponse("Ролі отримано", true, dtos);
         }
 
@@ -74,9 +79,16 @@ namespace pd311_web_api.BLL.Services.Role
 
         public async Task<ServiceResponse> UpdateAsync(RoleDto dto)
         {
-            var entity = _mapper.Map<AppRole>(dto);
+            var entity = await _roleManager.FindByIdAsync(dto.Id ?? "");
 
-            var result = await _roleManager.UpdateAsync(entity);
+            if(entity == null)
+            {
+                return new ServiceResponse($"Role id '{dto.Id}' not found");
+            }
+
+            var newEntity = _mapper.Map(dto, entity);
+
+            var result = await _roleManager.UpdateAsync(newEntity);
 
             if(result.Succeeded)
             {
