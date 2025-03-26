@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using pd311_web_api.BLL.DTOs.User;
-using pd311_web_api.BLL.Services;
 using pd311_web_api.BLL.Services.User;
 
 namespace pd311_web_api.Controllers
 {
     [ApiController]
     [Route("api/user")]
+    [Authorize(Roles = "admin", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class UserController : BaseController
     {
         private readonly IUserService _userService;

@@ -1,4 +1,6 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using pd311_web_api.BLL.DTOs.Role;
 using pd311_web_api.BLL.Services.Role;
@@ -7,6 +9,7 @@ namespace pd311_web_api.Controllers
 {
     [ApiController]
     [Route("api/role")]
+    [Authorize(Roles = "admin,manager", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class RoleController : BaseController
     {
         private readonly IRoleService _roleService;
@@ -19,9 +22,10 @@ namespace pd311_web_api.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAsync(string? id)
         {
-            if(string.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(id))
             {
                 var response = await _roleService.GetAllAsync();
                 return CreateActionResult(response);
@@ -64,7 +68,7 @@ namespace pd311_web_api.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteAsync(string? id) 
+        public async Task<IActionResult> DeleteAsync(string? id)
         {
             if (!ValidateId(id, out string message))
                 return BadRequest(message);

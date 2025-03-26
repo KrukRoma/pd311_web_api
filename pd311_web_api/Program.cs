@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using pd311_web_api.BLL;
 using pd311_web_api.BLL.DTOs.Account;
 using pd311_web_api.BLL.Services.Account;
@@ -48,7 +49,8 @@ builder.Services.AddAuthentication(options =>
             ValidateLifetime = true,
             ValidAudience = builder.Configuration["JwtSettings:Audience"],
             ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"] ?? ""))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"] ?? "")),
+            ClockSkew = TimeSpan.Zero
         };
     });
 
@@ -96,9 +98,6 @@ builder.Services
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-//builder.Services.AddOpenApi();
-builder.Services.AddSwaggerGen();
-
 // CORS
 builder.Services.AddCors(options =>
 {
@@ -111,12 +110,50 @@ builder.Services.AddCors(options =>
     });
 });
 
+// JWT bearer authorization
+builder.Services.AddEndpointsApiExplorer();
+
+//builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "PD311_API", Version = "v1" });
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = JwtBearerDefaults.AuthenticationScheme,
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter JWT token"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new []{Settings.RoleAdmin}
+        }
+    });
+});
+
 var app = builder.Build();
 
 // Middlewares
 app.UseMiddleware<MiddlewareExceptionHandler>();
 app.UseMiddleware<MiddlewareNullExceptionHandler>();
 app.UseMiddleware<MiddlewareLogger>();
+
+app.UseHttpsRedirection();
+
+app.UseCors("localhost3000");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -125,10 +162,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
-
-app.UseCors("localhost3000");
 
 Settings.RootPath = builder.Environment.ContentRootPath;
 string rootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
