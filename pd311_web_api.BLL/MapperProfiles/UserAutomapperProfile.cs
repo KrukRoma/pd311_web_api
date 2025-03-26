@@ -16,6 +16,14 @@ namespace pd311_web_api.BLL.MapperProfiles
             // AppUser -> UserDto
             CreateMap<AppUser, UserDto>()
                 .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles));
+
+            // CreateUserDto -> AppUser
+            CreateMap<CreateUserDto, AppUser>()
+                .ForMember(dest => dest.Image, opt => opt.Ignore());
+
+            // UpdateUserDto -> AppUser
+            CreateMap<UpdateUserDto, AppUser>()
+                .ForMember(dest => dest.Image, opt => opt.Ignore());
         }
     }
 }
