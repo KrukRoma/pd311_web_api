@@ -11,11 +11,13 @@ using pd311_web_api.BLL.Services.Account;
 using pd311_web_api.BLL.Services.Cars;
 using pd311_web_api.BLL.Services.Email;
 using pd311_web_api.BLL.Services.Image;
+using pd311_web_api.BLL.Services.JwtService;
 using pd311_web_api.BLL.Services.Manufactures;
 using pd311_web_api.BLL.Services.Role;
 using pd311_web_api.BLL.Services.User;
 using pd311_web_api.DAL;
 using pd311_web_api.DAL.Repositories.Cars;
+using pd311_web_api.DAL.Repositories.JwtRepository;
 using pd311_web_api.DAL.Repositories.Manufactures;
 using pd311_web_api.Middlewares;
 using Serilog;
@@ -62,10 +64,12 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<IManufactureService, ManufactureService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 // Add repositories
 builder.Services.AddScoped<IManufactureRepository, ManufactureRepository>();
 builder.Services.AddScoped<ICarRepository, CarRepository>();
+builder.Services.AddScoped<IJwtRepository, JwtRepository>();
 
 builder.Services.AddControllers();
 

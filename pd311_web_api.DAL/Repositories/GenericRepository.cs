@@ -17,16 +17,9 @@ namespace pd311_web_api.DAL.Repositories
 
         public async Task<bool> CreateAsync(TEntity entity)
         {
-            try
-            {
-                await _context.Set<TEntity>().AddAsync(entity);
-                var result = await _context.SaveChangesAsync();
-                return result != 0;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            await _context.Set<TEntity>().AddAsync(entity);
+            var result = await _context.SaveChangesAsync();
+            return result != 0;
         }
 
         public async Task<bool> DeleteAsync(TEntity entity)

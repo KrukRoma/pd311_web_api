@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using pd311_web_api.BLL.DTOs.Account;
 using pd311_web_api.BLL.Services.Email;
+using pd311_web_api.BLL.Services.JwtService;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -15,18 +16,20 @@ namespace pd311_web_api.BLL.Services.Account
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<AppRole> _roleManager;
+        private readonly IJwtService _jwtService;
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
 
         private readonly IMapper _mapper;
 
-        public AccountService(UserManager<AppUser> userManager, IEmailService emailService, IMapper mapper, RoleManager<AppRole> roleManager, IConfiguration configuration)
+        public AccountService(UserManager<AppUser> userManager, IEmailService emailService, IMapper mapper, RoleManager<AppRole> roleManager, IConfiguration configuration, IJwtService jwtService)
         {
             _userManager = userManager;
             _emailService = emailService;
             _mapper = mapper;
             _roleManager = roleManager;
             _configuration = configuration;
+            _jwtService = jwtService;
         }
 
         public async Task<bool> ConfirmEmailAsync(string id, string base64)
@@ -57,46 +60,9 @@ namespace pd311_web_api.BLL.Services.Account
                 return new ServiceResponse($"Пароль вказано невірно");
 
             // Generate jwt token
-            var claims = new List<Claim>
-            {
-                new Claim("id", user.Id),
-                new Claim("email", user.Email ?? ""),
-                new Claim("userName", user.UserName ?? ""),
-                new Claim("image", user.Image ?? "")
-            };
+            var tokens = await _jwtService.GenerateTokensAsync(user);
 
-            var roles = await _userManager.GetRolesAsync(user);
-            if(roles.Any())
-            {
-                var roleClaims = roles.Select(r => new Claim("role", r));
-                claims.AddRange(roleClaims);
-            }
-
-            string secretKey = _configuration["JwtSettings:Key"] ?? "";
-            string issuer = _configuration["JwtSettings:Issuer"] ?? "";
-            string audience = _configuration["JwtSettings:Audience"] ?? "";
-            int expMinutes = int.Parse(_configuration["JwtSettings:ExpTime"] ?? "");
-
-            if (string.IsNullOrEmpty(secretKey) 
-                || string.IsNullOrEmpty(issuer) 
-                || string.IsNullOrEmpty(audience))
-            {
-                throw new ArgumentNullException("Jwt settings is null");
-            }
-
-            var signinKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-
-            var token = new JwtSecurityToken(
-                issuer: issuer,
-                audience: audience,
-                claims: claims.ToArray(),
-                expires: DateTime.UtcNow.AddMinutes(expMinutes),
-                signingCredentials: new SigningCredentials(signinKey, SecurityAlgorithms.HmacSha256)
-                );
-
-            string jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
-
-            return new ServiceResponse("Успішний вхід", true, jwtToken);
+            return new ServiceResponse("Успішний вхід", true, tokens.Payload);
         }
 
         public async Task<ServiceResponse> RegisterAsync(RegisterDto dto)
@@ -127,46 +93,9 @@ namespace pd311_web_api.BLL.Services.Account
             await SendConfirmEmailTokenAsync(user.Id);
 
             // Generate jwt token
-            var claims = new List<Claim>
-            {
-                new Claim("id", user.Id),
-                new Claim("email", user.Email ?? ""),
-                new Claim("userName", user.UserName ?? ""),
-                new Claim("image", user.Image ?? "")
-            };
+            var tokens = await _jwtService.GenerateTokensAsync(user);
 
-            var roles = await _userManager.GetRolesAsync(user);
-            if (roles.Any())
-            {
-                var roleClaims = roles.Select(r => new Claim("role", r));
-                claims.AddRange(roleClaims);
-            }
-
-            string secretKey = _configuration["JwtSettings:Key"] ?? "";
-            string issuer = _configuration["JwtSettings:Issuer"] ?? "";
-            string audience = _configuration["JwtSettings:Audience"] ?? "";
-            int expMinutes = int.Parse(_configuration["JwtSettings:ExpTime"] ?? "");
-
-            if (string.IsNullOrEmpty(secretKey)
-                || string.IsNullOrEmpty(issuer)
-                || string.IsNullOrEmpty(audience))
-            {
-                throw new ArgumentNullException("Jwt settings is null");
-            }
-
-            var signinKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-
-            var token = new JwtSecurityToken(
-                issuer: issuer,
-                audience: audience,
-                claims: claims.ToArray(),
-                expires: DateTime.UtcNow.AddMinutes(expMinutes),
-                signingCredentials: new SigningCredentials(signinKey, SecurityAlgorithms.HmacSha256)
-                );
-
-            string jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
-
-            return new ServiceResponse("Успішна реєстрація", true, jwtToken);
+            return new ServiceResponse("Успішна реєстрація", true, tokens);
         }
 
         public async Task<bool> SendConfirmEmailTokenAsync(string userId)

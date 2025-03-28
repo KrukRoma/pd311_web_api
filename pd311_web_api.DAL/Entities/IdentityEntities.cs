@@ -14,6 +14,7 @@ namespace pd311_web_api.DAL.Entities
             public virtual ICollection<AppUserLogin> Logins { get; set; } = [];
             public virtual ICollection<AppUserToken> Tokens { get; set; } = [];
             public virtual ICollection<AppUserRole> UserRoles { get; set; } = [];
+            public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = [];
         }
 
         public class AppRole : IdentityRole
