@@ -5,6 +5,6 @@ namespace pd311_web_api.BLL.Services.Cars
     public interface ICarService
     {
         Task<ServiceResponse> CreateAsync(CreateCarDto dto);
-        Task<ServiceResponse> GetAllAsync();
+        Task<ServiceResponse> GetAllAsync(int page, int pageSize, string? manufacture);
     }
 }

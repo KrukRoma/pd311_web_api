@@ -51,17 +51,31 @@ namespace pd311_web_api.BLL.Services.Cars
             return new ServiceResponse($"Автомобіль '{entity.Brand} {entity.Model}' збережено", true);
         }
 
-        public async Task<ServiceResponse> GetAllAsync()
+        public async Task<ServiceResponse> GetAllAsync(int page, int pageSize, string? manufacture)
         {
+            int count = string.IsNullOrEmpty(manufacture)
+                ? _carRepository.GetAll().Count()
+                : _carRepository.GetCarsByManufacture(manufacture).Count();
+
+            int pageCount = (int)Math.Ceiling((double)count / pageSize);
+
+            page = page < 1 || page > pageCount ? 1 : page;
+
             var entities = await _carRepository
-                .GetAll()
-                .Include(e => e.Manufacture)
-                .Include(e => e.Images)
+                .GetCars(page, pageSize, manufacture)
                 .ToListAsync();
 
             var dtos = _mapper.Map<List<CarDto>>(entities);
 
-            return new ServiceResponse("Автомобілі отримано", true, dtos);
+            var listDto = new CarListDto
+            {
+                Cars = dtos,
+                Page = page,
+                PageCount = pageCount,
+                TotalCount = count
+            };
+
+            return new ServiceResponse("Автомобілі отримано", true, listDto);
         }
     }
 }

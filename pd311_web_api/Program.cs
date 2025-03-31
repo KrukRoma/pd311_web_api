@@ -19,7 +19,10 @@ using pd311_web_api.DAL;
 using pd311_web_api.DAL.Repositories.Cars;
 using pd311_web_api.DAL.Repositories.JwtRepository;
 using pd311_web_api.DAL.Repositories.Manufactures;
+using pd311_web_api.Jobs;
 using pd311_web_api.Middlewares;
+using Quartz;
+using Quartz.Core;
 using Serilog;
 using System.Text;
 using static pd311_web_api.DAL.Entities.IdentityEntities;
@@ -65,6 +68,39 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<IManufactureService, ManufactureService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+
+// Add quartz
+builder.Services.AddQuartz(q =>
+{
+    // Hello job
+    var helloJobKey = new JobKey("HelloJob");
+    q.AddJob<HelloJob>(opt => opt.WithIdentity(helloJobKey));
+
+    q.AddTrigger(opt => opt
+    .ForJob(helloJobKey)
+    .WithIdentity("HelloJob-trigger")
+    .WithCronSchedule("0 0/1 * * * ?"));
+
+    // Clean logs job
+    var cleanLogsJobKey = new JobKey("CleanLogsJob");
+    q.AddJob<CleanLogsJob>(opt => opt.WithIdentity(cleanLogsJobKey));
+
+    q.AddTrigger(opt => opt
+    .ForJob(cleanLogsJobKey)
+    .WithIdentity("CleanLogsJob-trigger")
+    .WithCronSchedule("* 0 0 * * ?"));
+
+    // Mailing job
+    var mailingJobKey = new JobKey("MailingJob");
+    q.AddJob<MailingJob>(opt => opt.WithIdentity(mailingJobKey));
+
+    q.AddTrigger(opt => opt
+    .ForJob(mailingJobKey)
+    .WithIdentity("MailingJob-trigger")
+    .WithCronSchedule("* 0 12 29 2 ?"));
+});
+
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 // Add repositories
 builder.Services.AddScoped<IManufactureRepository, ManufactureRepository>();
