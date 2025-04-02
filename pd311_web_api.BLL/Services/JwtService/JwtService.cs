@@ -29,11 +29,11 @@ namespace pd311_web_api.BLL.Services.JwtService
         {
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("userId", user.Id),
-                new Claim("email", user.Email ?? ""),
-                new Claim("userName", user.UserName ?? ""),
-                new Claim("image", user.Image ?? "")
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new("userId", user.Id),
+                new("email", user.Email ?? ""),
+                new("userName", user.UserName ?? ""),
+                new("image", user.Image ?? "")
             };
 
             var roles = await _userManager.GetRolesAsync(user);
@@ -60,7 +60,7 @@ namespace pd311_web_api.BLL.Services.JwtService
             var token = new JwtSecurityToken(
                 issuer: issuer,
                 audience: audience,
-                claims: claims.ToArray(),
+                claims: [.. claims],
                 expires: DateTime.UtcNow.AddMinutes(expMinutes),
                 signingCredentials: new SigningCredentials(signinKey, SecurityAlgorithms.HmacSha256)
                 );
@@ -114,11 +114,14 @@ namespace pd311_web_api.BLL.Services.JwtService
             return await _jwtRepository.CreateAsync(entity);
         }
 
-        private ClaimsPrincipal GetPrincipals(string accessToken)
+        private string GetSecretKey()
         {
-            string secretKey = _configuration["JwtSettings:Key"]
-                ?? throw new SecurityTokenInvalidSigningKeyException("Key noy found");
+            return _configuration["JwtSettings:Key"]
+                        ?? throw new SecurityTokenInvalidSigningKeyException("Key noy found");
+        }
 
+        private ClaimsPrincipal GetPrincipals(string accessToken, string secretKey)
+        {
             var validationParameters = new TokenValidationParameters
             {
                 RequireExpirationTime = true,
@@ -165,7 +168,7 @@ namespace pd311_web_api.BLL.Services.JwtService
                 throw new SecurityTokenExpiredException();
             }
 
-            var principals = GetPrincipals(dto.AccessToken ?? "");
+            var principals = GetPrincipals(dto.AccessToken ?? "", GetSecretKey());
 
             var accessTokenId = principals.Claims.Single(c => c.Type == JwtRegisteredClaimNames.Jti).Value;
 
@@ -177,12 +180,8 @@ namespace pd311_web_api.BLL.Services.JwtService
             storedToken.IsUsed = true;
             await _jwtRepository.UpdateAsync(storedToken);
 
-            var user = await _userManager.FindByIdAsync(storedToken.UserId ?? "");
-
-            if(user == null)
-            {
-                throw new ArgumentNullException("User not found");
-            }
+            var user = await _userManager.FindByIdAsync(storedToken.UserId ?? "") 
+                ?? throw new ArgumentNullException("User not found");
 
             var tokens = await GenerateTokensAsync(user);
 

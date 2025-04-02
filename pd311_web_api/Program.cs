@@ -3,28 +3,18 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using pd311_web_api.BLL;
 using pd311_web_api.BLL.DTOs.Account;
-using pd311_web_api.BLL.Services.Account;
-using pd311_web_api.BLL.Services.Cars;
-using pd311_web_api.BLL.Services.Email;
-using pd311_web_api.BLL.Services.Image;
-using pd311_web_api.BLL.Services.JwtService;
-using pd311_web_api.BLL.Services.Manufactures;
-using pd311_web_api.BLL.Services.Role;
-using pd311_web_api.BLL.Services.User;
 using pd311_web_api.DAL;
 using pd311_web_api.DAL.Repositories.Cars;
 using pd311_web_api.DAL.Repositories.JwtRepository;
 using pd311_web_api.DAL.Repositories.Manufactures;
+using pd311_web_api.Infrastructure;
 using pd311_web_api.Jobs;
 using pd311_web_api.Middlewares;
 using Quartz;
-using Quartz.Core;
 using Serilog;
-using System.Text;
 using static pd311_web_api.DAL.Entities.IdentityEntities;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,68 +28,21 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            RequireExpirationTime = true,
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateIssuerSigningKey = true,
-            ValidateLifetime = true,
-            ValidAudience = builder.Configuration["JwtSettings:Audience"],
-            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"] ?? "")),
-            ClockSkew = TimeSpan.Zero
-        };
-    });
+// Add jwt
+builder.Services.AddJwtSettings(builder.Configuration);
 
 // Add services to the container.
-builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IRoleService, RoleService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IImageService, ImageService>();
-builder.Services.AddScoped<ICarService, CarService>();
-builder.Services.AddScoped<IManufactureService, ManufactureService>();
-builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddServices(AppDomain.CurrentDomain.GetAssemblies());
 
-// Add quartz
-builder.Services.AddQuartz(q =>
+// Add jobs
+var jobs = new (Type type, string schedule)[]
 {
-    // Hello job
-    var helloJobKey = new JobKey("HelloJob");
-    q.AddJob<HelloJob>(opt => opt.WithIdentity(helloJobKey));
+    (typeof(HelloJob), "0 0/1 * * * ?"),
+    (typeof(CleanLogsJob), "* 0 0 * * ?"),
+    (typeof(MailingJob), "* 0 12 29 2 ?")
+};
 
-    q.AddTrigger(opt => opt
-    .ForJob(helloJobKey)
-    .WithIdentity("HelloJob-trigger")
-    .WithCronSchedule("0 0/1 * * * ?"));
-
-    // Clean logs job
-    var cleanLogsJobKey = new JobKey("CleanLogsJob");
-    q.AddJob<CleanLogsJob>(opt => opt.WithIdentity(cleanLogsJobKey));
-
-    q.AddTrigger(opt => opt
-    .ForJob(cleanLogsJobKey)
-    .WithIdentity("CleanLogsJob-trigger")
-    .WithCronSchedule("* 0 0 * * ?"));
-
-    // Mailing job
-    var mailingJobKey = new JobKey("MailingJob");
-    q.AddJob<MailingJob>(opt => opt.WithIdentity(mailingJobKey));
-
-    q.AddTrigger(opt => opt
-    .ForJob(mailingJobKey)
-    .WithIdentity("MailingJob-trigger")
-    .WithCronSchedule("* 0 12 29 2 ?"));
-});
-
+builder.Services.AddJobs(jobs);
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 // Add repositories
@@ -207,7 +150,7 @@ Settings.RootPath = builder.Environment.ContentRootPath;
 string rootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
 string imagesPath = Path.Combine(rootPath, Settings.RootImagesPath);
 
-if(!Directory.Exists(rootPath))
+if (!Directory.Exists(rootPath))
 {
     Directory.CreateDirectory(rootPath);
 }
