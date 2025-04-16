@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using pd311_web_api.BLL.MapperProfiles;
 using pd311_web_api.BLL.Services.Account;
 using pd311_web_api.BLL.Services.Cars;
 using pd311_web_api.BLL.Services.Email;
@@ -10,7 +9,6 @@ using pd311_web_api.BLL.Services.Manufactures;
 using pd311_web_api.BLL.Services.Role;
 using pd311_web_api.BLL.Services.User;
 using Quartz;
-using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Text;
 

@@ -1,12 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using pd311_web_api.BLL.DTOs.Account;
 using pd311_web_api.BLL.Services.Email;
 using pd311_web_api.BLL.Services.JwtService;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 using static pd311_web_api.DAL.Entities.IdentityEntities;
 
@@ -36,7 +33,7 @@ namespace pd311_web_api.BLL.Services.Account
         {
             var user = await _userManager.FindByIdAsync(id);
 
-            if(user != null)
+            if (user != null)
             {
                 var bytes = Convert.FromBase64String(base64);
                 var token = Encoding.UTF8.GetString(bytes);
@@ -62,7 +59,7 @@ namespace pd311_web_api.BLL.Services.Account
             // Generate jwt token
             var tokens = await _jwtService.GenerateTokensAsync(user);
 
-            return new ServiceResponse("Успішний вхід", true, tokens.Payload);
+            return new ServiceResponse("Успішний вхід", true, tokens);
         }
 
         public async Task<ServiceResponse> RegisterAsync(RegisterDto dto)
@@ -77,12 +74,12 @@ namespace pd311_web_api.BLL.Services.Account
 
             var result = await _userManager.CreateAsync(user, dto.Password);
 
-            if(!result.Succeeded)
+            if (!result.Succeeded)
             {
                 return new ServiceResponse(result.Errors.First().Description);
             }
 
-            if(result.Succeeded && await _roleManager.RoleExistsAsync("user"))
+            if (result.Succeeded && await _roleManager.RoleExistsAsync("user"))
             {
                 result = await _userManager.AddToRoleAsync(user, "user");
             }

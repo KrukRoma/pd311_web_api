@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using pd311_web_api.BLL;
 using pd311_web_api.BLL.DTOs.Account;
 using pd311_web_api.DAL;
+using pd311_web_api.DAL.Initializer;
 using pd311_web_api.DAL.Repositories.Cars;
 using pd311_web_api.DAL.Repositories.JwtRepository;
 using pd311_web_api.DAL.Repositories.Manufactures;
@@ -139,12 +140,15 @@ app.UseHttpsRedirection();
 app.UseCors("localhost3000");
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    //app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+//    //app.MapOpenApi();
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 Settings.RootPath = builder.Environment.ContentRootPath;
 string rootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
@@ -171,5 +175,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.Seed();
 
 app.Run();
