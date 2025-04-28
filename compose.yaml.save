@@ -19,7 +19,7 @@ services:
 
   api:
     build: .
-    image: potapchuk22/pd311_api
+    image: api_pd311
     container_name: "api"
     ports:
       - "80:8080"
