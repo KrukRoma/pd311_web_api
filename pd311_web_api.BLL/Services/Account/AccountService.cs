@@ -57,9 +57,9 @@ namespace pd311_web_api.BLL.Services.Account
                 return new ServiceResponse($"Пароль вказано невірно");
 
             // Generate jwt token
-            var tokens = await _jwtService.GenerateTokensAsync(user);
+            var response = await _jwtService.GenerateTokensAsync(user);
 
-            return new ServiceResponse("Успішний вхід", true, tokens);
+            return new ServiceResponse("Успішний вхід", true, response.Payload);
         }
 
         public async Task<ServiceResponse> RegisterAsync(RegisterDto dto)
