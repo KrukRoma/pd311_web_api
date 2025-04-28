@@ -33,6 +33,8 @@ namespace pd311_web_api.BLL.Services.Manufactures
 
             if(dto.Image != null)
             {
+                _imageService.CreateImagesDirectory(Settings.ManufacturesImagesPath);
+
                 imageName = await _imageService.SaveImageAsync(dto.Image, Settings.ManufacturesImagesPath);
                 if(imageName != null)
                 {
