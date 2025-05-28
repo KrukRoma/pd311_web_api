@@ -1,0 +1,33 @@
+﻿version: '3.8'
+
+services:
+  web-api:
+    image: pd311-web-api
+    build:
+      context: ./pd311_web_api
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=pd31.postgres.database.azure.com;Port=5432;Database=postgres;Username=Roman@pd31;Password=Ro012008;SSL Mode=Require;
+    depends_on:
+      - react-app
+    networks:
+      - app-network
+
+  react-app:
+    image: pd311-react-app
+    build:
+      context: ./dashboard_pd311
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
